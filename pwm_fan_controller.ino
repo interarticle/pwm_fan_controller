@@ -1,4 +1,4 @@
-const int PWM_PIN = 25;
+const int PWM_PIN = 3;
 const int LED_PIN = 13;
 
 const uint8_t PWM_INCREMENT = 20;
