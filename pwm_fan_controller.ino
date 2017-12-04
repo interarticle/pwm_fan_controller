@@ -1,20 +1,20 @@
 const int PWM_PIN = 23;
 const int LED_PIN = 13;
+const int MANUAL_ADJ_PIN = 8;  // A8.
 
 const uint8_t PWM_INCREMENT = 20;
-const uint8_t PWM_MAX = 50;
 const int WAIT_CYCLES = 5;
 const int MONITOR_CYCLES = 2;
 
 enum op_mode_t {
   OP_MODE_WAIT,
-  OP_MODE_START,
-  OP_MODE_MONITOR,
+  OP_MODE_RUN,
 };
 
 uint8_t pwm_output;
 uint8_t wait_count;
 uint8_t monitor_count;
+
 enum op_mode_t op_mode;
 
 void setup_quad_dec() {
@@ -57,21 +57,23 @@ void setup() {
 }
 
 void loop() {
+  const uint16_t user_input = analogRead(MANUAL_ADJ_PIN);
+  const uint8_t user_speed = user_input >> 2;  // 10-bit to 8-bit.
   // put your main code here, to run repeatedly:
   if (op_mode == OP_MODE_WAIT) {
     pwm_output = 0;
   }
   analogWrite(PWM_PIN, pwm_output);
 
-  if (op_mode == OP_MODE_START) {
-    if (pwm_output < PWM_MAX) {
-      if ((int) pwm_output + PWM_INCREMENT > PWM_MAX) {
-        pwm_output = PWM_MAX;
+  if (op_mode == OP_MODE_RUN) {
+    if (pwm_output < user_speed) {
+      if ((int) pwm_output + PWM_INCREMENT > user_speed) {
+        pwm_output = user_speed;
       } else {
         pwm_output += PWM_INCREMENT;
       }
-    } else {
-      op_mode = OP_MODE_MONITOR;
+    } else if (pwm_output >= user_speed) {
+      pwm_output = user_speed;
     }
   }
 
@@ -83,8 +85,7 @@ void loop() {
   {
     int current_speed = read_clear_decoder();
     switch (op_mode) {
-     case OP_MODE_START:
-     case OP_MODE_MONITOR:
+     case OP_MODE_RUN:
       wait_count = 0;
       if (current_speed == 0) {
         monitor_count ++;
@@ -105,7 +106,7 @@ void loop() {
       }
 
       if (wait_count >= WAIT_CYCLES) {
-        op_mode = OP_MODE_START;
+        op_mode = OP_MODE_RUN;
       }
       break;
     }
