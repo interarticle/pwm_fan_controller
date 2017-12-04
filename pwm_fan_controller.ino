@@ -1,8 +1,8 @@
-const int PWM_PIN = 3;
+const int PWM_PIN = 23;
 const int LED_PIN = 13;
 
 const uint8_t PWM_INCREMENT = 20;
-const uint8_t PWM_MAX = 200;
+const uint8_t PWM_MAX = 50;
 const int WAIT_CYCLES = 5;
 const int MONITOR_CYCLES = 2;
 
